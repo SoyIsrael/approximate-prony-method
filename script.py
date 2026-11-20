@@ -41,11 +41,50 @@ def main():
     L = 6
     seed = 1
     e_1 = 1e-6
+    e_2 = 1e-5
+    e_4 = 1e-6
     w, rho, h, h_perturbed = make_data(M, N, seed, e_1)
-    print(f"w: {w}\n rho={rho}\n h={h}\n h_perturbed={h_perturbed}")
 
+    H = build_hankel(h, N, L)
     H_perturbed = build_hankel(h_perturbed, N, L)
-    print(f"H_perturbed shape: {H_perturbed.shape}")
+
+    V_perturbed, S_perturbed, Uh_perturbed = np.linalg.svd(H_perturbed, full_matrices=False)
+    V, S, Uh = np.linalg.svd(H, full_matrices=False)
+
+    idx = [i for i, s in enumerate(S_perturbed) if 0 < s <= e_2]
+
+    smallest_sing_value = S_perturbed[idx[-1]]
+    smallest_right_sing_vector = Uh_perturbed[idx[-1]].conj()
+    # smallest_left_sing_vector = V_perturbed[:, idx[-1]]
+
+    second_smallest_sing_value = S_perturbed[idx[-2]]
+    second_smallest_right_sing_vector = Uh_perturbed[idx[-2]].conj()
+    # second_smallest_left_sing_vector = V_perturbed[:, idx[-2]]
+
+
+    P_1 = Polynomial(smallest_right_sing_vector)
+    roots_P_1 = P_1.roots()
+    print(roots_P_1)
+
+    valid_roots_P_1 = []
+    for root in roots_P_1:
+        modulus = np.abs(root)
+        angle = np.angle(root)
+        if np.abs(modulus - 1) <= e_4 and 0 < angle < np.pi:
+            valid_roots_P_1.append(root)
+
+    P_2 = Polynomial(second_smallest_right_sing_vector)
+    roots_P_2 = P_2.roots()
+    print(roots_P_2)
+
+    valid_roots_P_2 = []
+    for root in roots_P_2:
+        modulus = np.abs(root)
+        angle = np.angle(root)
+        if np.abs(modulus - 1) <= e_4 and 0 < angle < np.pi:
+            valid_roots_P_2.append(root)
+
+    print(valid_roots_P_2)
 
 if __name__ == '__main__':
     main()
