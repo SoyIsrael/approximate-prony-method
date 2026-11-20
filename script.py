@@ -10,7 +10,7 @@ def make_data(M, N, seed, e_1):
         M (int): number of positive frequencies from w_{-M}, w_{-(M-1),...w_{M-1}, w_M}
         N (int): related to the number of samples taken, 2 * N + 1
         seed (int): testing parameter for reproducibility
-        e_1 (float): the noise bound, |e_{j}| < e_1 for all j
+        e_1 (float): the noise bound, |e_{j}| <= e_1 for all j
     
     Returns:
         w: randomly generated frequencies 0 = w_0 <= w_1 <= w_2 <= ... <= w_M 
@@ -29,6 +29,12 @@ def make_data(M, N, seed, e_1):
     h_perturbed = h + err
     return w, rho, h, h_perturbed
 
+def build_hankel(h, N, L):
+    return hankel(h[0:2 * N - L + 1], h[2 * N - L:2 * N + 1]) 
+    # The function hankel(A, B) takes in two vectors. 
+    # A is the first column of the desired Hankel matrix
+    # B is the last row of the desired Hankel matrix
+    
 def main():
     M = 2
     N = 20
@@ -37,6 +43,9 @@ def main():
     e_1 = 1e-6
     w, rho, h, h_perturbed = make_data(M, N, seed, e_1)
     print(f"w: {w}\n rho={rho}\n h={h}\n h_perturbed={h_perturbed}")
+
+    H_perturbed = build_hankel(h_perturbed, N, L)
+    print(f"H_perturbed shape: {H_perturbed.shape}")
 
 if __name__ == '__main__':
     main()
